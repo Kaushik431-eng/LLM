@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saffron Table - Reservations</title>
+<style>
+:root{--bg:#f4f6f3;--card:#fff;--ink:#17211c;--mute:#5d6b63;--line:#d9e0db;--brand:#1f5f4a;--brandlt:#e3f0ea;--full:#e9e9e9;--warn:#b45309;--warnlt:#fdf0dc;--bad:#b42318;--badlt:#fde8e6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,Segoe UI,Arial,sans-serif}
+h1,h2,h3{font-family:Georgia,serif;margin:0 0 .4em}
+header{background:var(--brand);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+header h1{font-size:22px;margin:0}
+nav{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+nav .grp{font-size:12px;opacity:.7;margin:0 4px 0 12px}
+nav button{background:transparent;color:#fff;border:1px solid #ffffff55;padding:6px 12px;border-radius:6px;cursor:pointer;font:inherit}
+nav button.on{background:#fff;color:var(--brand);font-weight:600}
+main{max-width:1000px;margin:22px auto;padding:0 16px}
+.screen{display:none}.screen.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
+.row{display:flex;gap:14px;flex-wrap:wrap}.row>*{flex:1;min-width:180px}
+label{display:block;font-weight:600;font-size:13px;margin-bottom:4px}
+input,select{width:100%;padding:9px;border:1px solid var(--line);border-radius:6px;font:inherit;background:#fff}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.btn{background:var(--brand);color:#fff;border:0;padding:10px 18px;border-radius:6px;cursor:pointer;font:inherit;font-weight:600}
+.btn.alt{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+.btn.bad{background:#fff;color:var(--bad);border:1px solid var(--bad)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.slot{border:2px solid var(--brand);background:var(--brandlt);border-radius:8px;padding:10px;text-align:center;cursor:pointer;font:inherit;color:var(--ink)}
+.slot b{display:block;font-size:17px}.slot small{color:var(--brand);font-weight:600}
+.slot.full{border:2px dashed #b9b9b9;background:repeating-linear-gradient(45deg,#f0f0f0,#f0f0f0 6px,#e4e4e4 6px,#e4e4e4 12px);cursor:not-allowed;color:#777}
+.slot.full small{color:#777}
+.slot.sel{background:var(--brand);color:#fff}.slot.sel small{color:#fff}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--mute);margin:10px 0 0}
+.dot{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.err{background:var(--badlt);color:var(--bad);border:1px solid #f3b9b3;padding:9px 12px;border-radius:6px;margin-top:10px;display:none}
+.err.on{display:block}
+.hint{color:var(--mute);font-size:13px;margin-top:4px}
+.menucat{margin-bottom:6px;border-bottom:2px solid var(--brand);padding-bottom:2px;color:var(--brand)}
+.item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.item .nm{flex:1}.item .pr{font-weight:600;width:70px;text-align:right}
+.qty{display:flex;align-items:center;gap:8px}
+.qty button{width:30px;height:30px;border-radius:50%;border:1px solid var(--brand);background:#fff;color:var(--brand);font-size:18px;cursor:pointer;line-height:1}
+.qty span{width:20px;text-align:center;font-weight:600}
+.total{position:sticky;bottom:0;background:var(--ink);color:#fff;border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.total strong{font-size:22px;font-family:Georgia,serif}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700}
+.b-Confirmed{background:var(--brandlt);color:var(--brand)}.b-Completed{background:#e6e9f7;color:#2b3a8c}.b-Cancelled{background:var(--badlt);color:var(--bad)}
+.tag{font-size:12px;padding:2px 8px;border-radius:5px}
+.t-pre{background:var(--warnlt);color:var(--warn)}.t-none{background:#eef0ee;color:var(--mute)}
+.rcard{display:flex;gap:14px;justify-content:space-between;flex-wrap:wrap}
+.empty{text-align:center;padding:36px 10px;color:var(--mute)}
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+th{background:#eef2ef;font-size:13px}
+.grid td.c{text-align:center;font-size:12px;border-left:1px solid var(--line)}
+.free{background:var(--brandlt);color:var(--brand)}.res{background:var(--warnlt);color:var(--warn);font-weight:600}
+.sum dt{color:var(--mute);font-size:13px}.sum dd{margin:0 0 10px;font-weight:600}
+.toast{position:fixed;top:14px;right:14px;background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;display:none;z-index:9}
+.toast.on{display:block}
+.steps{display:flex;gap:6px;margin-bottom:14px;font-size:13px;color:var(--mute)}
+.steps span{padding:3px 10px;border-radius:99px;background:#e6ebe7}.steps .on{background:var(--brand);color:#fff}
+@media(max-width:600px){header{padding:12px}.item .pr{width:55px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Saffron Table</h1>
+  <nav id="nav"></nav>
+</header>
+<main>
+  <section class="screen" id="s1"></section>
+  <section class="screen" id="s2"></section>
+  <section class="screen" id="s3"></section>
+  <section class="screen" id="s4"></section>
+  <section class="screen" id="s5"></section>
+  <section class="screen" id="s6"></section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- DATA ---------- */
+const today = new Date().toISOString().slice(0,10);
+const SLOTS = ['12:00','13:00','14:00','19:00','20:00','21:00'];
+const tables = [{id:'T1',cap:2},{id:'T2',cap:2},{id:'T3',cap:4},{id:'T4',cap:4},{id:'T5',cap:6},{id:'T6',cap:8}];
+let menu = [
+  {id:1,name:'Tomato Soup',cat:'Starters',price:120},{id:2,name:'Paneer Tikka',cat:'Starters',price:220},
+  {id:3,name:'Veg Biryani',cat:'Mains',price:280},{id:4,name:'Butter Chicken',cat:'Mains',price:340},
+  {id:5,name:'Dal Makhani',cat:'Mains',price:240},{id:6,name:'Gulab Jamun',cat:'Desserts',price:90},
+  {id:7,name:'Ice Cream',cat:'Desserts',price:110}];
+let nextMenuId = 8, nextResId = 105;
+let reservations = [
+  {id:101,name:'Riya Shah',phone:'9876500001',date:today,slot:'20:00',party:2,table:'T1',items:{},status:'Confirmed'},
+  {id:102,name:'Amit Patel',phone:'9876500002',date:today,slot:'20:00',party:2,table:'T2',items:{},status:'Confirmed'},
+  {id:103,name:'Neha Joshi',phone:'9876500003',date:today,slot:'20:00',party:4,table:'T3',items:{3:2,6:2},status:'Confirmed'},
+  {id:104,name:'Karan Mehta',phone:'9876500004',date:today,slot:'20:00',party:4,table:'T4',items:{},status:'Confirmed'},
+  {id:105-1+0,name:'Sana Khan',phone:'9876500005',date:today,slot:'20:00',party:6,table:'T5',items:{},status:'Confirmed'},
+  {id:106,name:'Dev Rao',phone:'9876500006',date:today,slot:'20:00',party:8,table:'T6',items:{4:2,5:1},status:'Confirmed'},
+  {id:107,name:'Riya Shah',phone:'9876500001',date:today,slot:'13:00',party:3,table:'T3',items:{2:1,3:2},status:'Confirmed'},
+  {id:108,name:'Riya Shah',phone:'9876500001',date:'2026-09-20',slot:'19:00',party:2,table:'T1',items:{},status:'Completed'},
+  {id:109,name:'Riya Shah',phone:'9876500001',date:'2026-09-02',slot:'21:00',party:4,table:'T3',items:{},status:'Cancelled'}];
+nextResId = 110;
+const ME = 'Riya Shah'; // logged-in customer (demo)
+let draft = {party:2,date:today,slot:null,name:ME,phone:'9876500001',items:{},editId:null};
+
+/* ---------- HELPERS ---------- */
+const $ = id => document.getElementById(id);
+const money = n => '₹' + n.toLocaleString('en-IN');
+const itemTotal = items => Object.entries(items).reduce((s,[id,q]) => s + q*(menu.find(m=>m.id==id)?.price||0), 0);
+const itemCount = items => Object.values(items).reduce((a,b)=>a+b,0);
+const clean = items => Object.fromEntries(Object.entries(items).filter(([,q])=>q>0));
+function toast(msg){const t=$('toast');t.textContent=msg;t.className='toast on';setTimeout(()=>t.className='toast',2200)}
+function busy(date,slot,ignoreId){return reservations.filter(r=>r.date===date&&r.slot===slot&&r.status==='Confirmed'&&r.id!==ignoreId).map(r=>r.table)}
+function freeTables(date,slot,party,ignoreId){const b=busy(date,slot,ignoreId);return tables.filter(t=>!b.includes(t.id)&&t.cap>=party)}
+function itemsText(items){return Object.entries(items).map(([id,q])=>q+' × '+(menu.find(m=>m.id==id)?.name||'Item')).join(', ')}
+
+/* ---------- NAV ---------- */
+const NAV = [['Customer'],[1,'Reserve'],[2,'Pre-order'],[3,'Summary'],[4,'My Reservations'],['Staff'],[5,'Table Overview'],[6,'Reservations & Menu']];
+function buildNav(){
+  $('nav').innerHTML = NAV.map(n => n.length===1 ? `<span class="grp">${n[0]}:</span>` : `<button data-s="${n[0]}" onclick="go(${n[0]})">${n[1]}</button>`).join('');
+}
+function go(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  $('s'+n).classList.add('on');
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.s==n));
+  [null,r1,r2,r3,r4,r5,r6][n]();
+  window.scrollTo(0,0);
+}
+const stepper = n => `<div class="steps">${['1 Details','2 Pre-order','3 Confirm'].map((t,i)=>`<span class="${i+1===n?'on':''}">${t}</span>`).join('')}</div>`;
+
+/* ---------- SCREEN 1: RESERVATION FORM ---------- */
+function r1(){
+  const ok = draft.slot!==null;
+  $('s1').innerHTML = `${stepper(1)}<h2>${draft.editId?'Modify reservation':'Reserve a table'}</h2>
+  <div class="card"><div class="row">
+    <div><label>Party size</label><input type="number" id="party" min="1" max="20" value="${draft.party}" oninput="draft.party=+this.value;draft.slot=null;r1Slots()"></div>
+    <div><label>Date</label><input type="date" id="date" min="${today}" value="${draft.date}" onchange="draft.date=this.value;draft.slot=null;r1Slots()"></div>
+  </div><div class="err" id="e1"></div></div>
+  <div class="card"><h3>Pick a time slot</h3><div class="slots" id="slots"></div>
+    <div class="legend"><span><i class="dot" style="background:var(--brandlt);border:2px solid var(--brand)"></i>Available</span><span><i class="dot" style="background:#ddd;border:2px dashed #aaa"></i>Fully booked</span><span><i class="dot" style="background:var(--brand)"></i>Selected</span></div></div>
+  <div class="card"><h3>Your details</h3><div class="row">
+    <div><label>Full name</label><input id="cname" value="${draft.name}" oninput="draft.name=this.value"></div>
+    <div><label>Phone</label><input id="cphone" value="${draft.phone}" oninput="draft.phone=this.value"></div></div>
+    <div class="err" id="e2"></div></div>
+  <button class="btn" onclick="r1Next()">Next: choose pre-order</button>`;
+  r1Slots();
+}
+function r1Slots(){
+  const e=$('e1'), p=draft.party, maxCap=Math.max(...tables.map(t=>t.cap));
+  e.className='err';
+  if(!p||p<1){e.textContent='Enter a party size of 1 or more.';e.className='err on'}
+  else if(p>maxCap){e.textContent=`Our largest table seats ${maxCap}. For ${p} guests, please call the restaurant or split into two bookings.`;e.className='err on'}
+  $('slots').innerHTML = SLOTS.map(s=>{
+    const free = (p>=1&&p<=maxCap) ? freeTables(draft.date,s,p,draft.editId) : [];
+    const full = free.length===0;
+    return `<button class="slot ${full?'full':''} ${draft.slot===s?'sel':''}" ${full?'disabled':''} onclick="draft.slot='${s}';r1Slots()"><b>${s}</b><small>${full?'Fully booked':free.length+' table'+(free.length>1?'s':'')+' left'}</small></button>`}).join('');
+}
+function r1Next(){
+  const e=$('e2'), p=draft.party, maxCap=Math.max(...tables.map(t=>t.cap)); let m='';
+  if(!p||p<1||p>maxCap) m='Fix the party size first (1 to '+maxCap+').';
+  else if(!draft.slot) m='Select an available time slot.';
+  else if(!draft.name.trim()) m='Enter your name.';
+  else if(!/^\d{10}$/.test(draft.phone)) m='Enter a valid 10-digit phone number.';
+  if(m){e.textContent=m;e.className='err on';return}
+  go(2);
+}
+
+/* ---------- SCREEN 2: PRE-ORDER MENU ---------- */
+function r2(){
+  const cats=['Starters','Mains','Desserts'];
+  $('s2').innerHTML = `${stepper(2)}<h2>Pre-order menu <small style="font-size:14px;color:var(--mute);font-family:system-ui">(optional)</small></h2>
+  <p class="hint">Add dishes now so they are ready when you arrive. You can skip this step.</p>
+  ${cats.map(c=>{const list=menu.filter(m=>m.cat===c);return `<div class="card"><h3 class="menucat">${c}</h3>${list.length?list.map(m=>`
+    <div class="item"><div class="nm">${m.name}</div><div class="pr">${money(m.price)}</div>
+    <div class="qty"><button aria-label="Remove one ${m.name}" onclick="chg(${m.id},-1)">−</button><span id="q${m.id}">${draft.items[m.id]||0}</span><button aria-label="Add one ${m.name}" onclick="chg(${m.id},1)">+</button></div></div>`).join(''):'<p class="hint">No items in this category.</p>'}</div>`}).join('')}
+  <div class="total"><div><div style="font-size:13px;opacity:.8"><span id="cnt"></span> item(s) added</div><strong id="tot"></strong></div>
+  <div><button class="btn alt" onclick="go(1)">Back</button> <button class="btn" onclick="go(3)">Review reservation</button></div></div>`;
+  upd();
+}
+function chg(id,d){const q=Math.max(0,Math.min(20,(draft.items[id]||0)+d));draft.items[id]=q;$('q'+id).textContent=q;upd()}
+function upd(){$('tot').textContent=money(itemTotal(draft.items));$('cnt').textContent=itemCount(draft.items)}
+
+/* ---------- SCREEN 3: SUMMARY ---------- */
+function r3(){
+  if(!draft.slot){$('s3').innerHTML=`<div class="card empty"><h3>Nothing to confirm yet</h3><p>Start by choosing a date and time slot.</p><button class="btn" onclick="go(1)">Go to reservation form</button></div>`;return}
+  const it=clean(draft.items), has=itemCount(it)>0;
+  const tbl=freeTables(draft.date,draft.slot,draft.party,draft.editId)[0];
+  $('s3').innerHTML=`${stepper(3)}<h2>Confirm your reservation</h2>
+  <div class="card"><dl class="sum">
+    <dt>Guest</dt><dd>${draft.name} · ${draft.phone}</dd>
+    <dt>Date and time</dt><dd>${draft.date} at ${draft.slot}</dd>
+    <dt>Party size</dt><dd>${draft.party} guests</dd>
+    <dt>Table</dt><dd>${tbl?tbl.id+' (seats '+tbl.cap+')':'No table free, choose another slot'}</dd></dl></div>
+  <div class="card"><h3>Pre-ordered items <span class="tag ${has?'t-pre':'t-none'}">${has?'Pre-order attached':'Table only'}</span></h3>
+  ${has?`<table><tr><th>Item</th><th>Qty</th><th>Amount</th></tr>${Object.entries(it).map(([id,q])=>{const m=menu.find(x=>x.id==id);return `<tr><td>${m.name}</td><td>${q}</td><td>${money(q*m.price)}</td></tr>`}).join('')}
+    <tr><td colspan="2"><b>Total estimated bill</b></td><td><b>${money(itemTotal(it))}</b></td></tr></table>`
+   :`<p class="hint">No dishes pre-ordered. You can order at the table, or add items now.</p><button class="btn alt sm" onclick="go(2)">Add pre-order items</button>`}</div>
+  <button class="btn alt" onclick="go(1)">Edit details</button> ${has?'<button class="btn alt" onclick="go(2)">Edit items</button>':''}
+  <button class="btn" ${tbl?'':'disabled'} onclick="confirmRes()">Confirm reservation</button>`;
+}
+function confirmRes(){
+  const tbl=freeTables(draft.date,draft.slot,draft.party,draft.editId)[0]; if(!tbl)return;
+  const rec={name:draft.name,phone:draft.phone,date:draft.date,slot:draft.slot,party:draft.party,table:tbl.id,items:clean(draft.items),status:'Confirmed'};
+  if(draft.editId){Object.assign(reservations.find(r=>r.id===draft.editId),rec)}else{reservations.push({id:nextResId++,...rec})}
+  toast(draft.editId?'Reservation updated':'Reservation confirmed');
+  draft={party:2,date:today,slot:null,name:ME,phone:'9876500001',items:{},editId:null};
+  go(4);
+}
+
+/* ---------- SCREEN 4: MY RESERVATIONS ---------- */
+let tab4='upcoming';
+function r4(){
+  const mine=reservations.filter(r=>r.name===ME).sort((a,b)=>(a.date+a.slot).localeCompare(b.date+b.slot));
+  const up=mine.filter(r=>r.status==='Confirmed'), past=mine.filter(r=>r.status!=='Confirmed');
+  const list=tab4==='upcoming'?up:past;
+  $('s4').innerHTML=`<h2>My reservations</h2>
+  <div style="margin-bottom:12px"><button class="btn ${tab4==='upcoming'?'':'alt'} sm" onclick="tab4='upcoming';r4()">Upcoming (${up.length})</button> <button class="btn ${tab4==='past'?'':'alt'} sm" onclick="tab4='past';r4()">Past (${past.length})</button></div>
+  ${list.length?list.map(r=>{const has=itemCount(r.items)>0;return `<div class="card rcard"><div>
+    <h3>${r.date} at ${r.slot} <span class="badge b-${r.status}">${r.status}</span></h3>
+    <div>${r.party} guests · Table ${r.table}</div>
+    <div style="margin-top:6px"><span class="tag ${has?'t-pre':'t-none'}">${has?'Pre-order attached':'No pre-order'}</span></div>
+    ${has?`<div class="hint">${itemsText(r.items)} · ${money(itemTotal(r.items))}</div>`:''}</div>
+    <div>${r.status==='Confirmed'?`<button class="btn alt sm" onclick="modify(${r.id})">Modify</button> <button class="btn bad sm" onclick="cancelRes(${r.id})">Cancel</button>`:''}</div></div>`}).join('')
+  :`<div class="card empty"><h3>${tab4==='upcoming'?'No upcoming reservations':'No past reservations'}</h3><p>${tab4==='upcoming'?'Book a table and it will show up here.':'Completed and cancelled bookings appear here.'}</p>${tab4==='upcoming'?'<button class="btn" onclick="go(1)">Reserve a table</button>':''}</div>`}`;
+}
+function cancelRes(id){if(confirm('Cancel this reservation?')){reservations.find(r=>r.id===id).status='Cancelled';toast('Reservation cancelled');r4()}}
+function modify(id){const r=reservations.find(x=>x.id===id);draft={party:r.party,date:r.date,slot:r.slot,name:r.name,phone:r.phone,items:{...r.items},editId:id};go(1)}
+
+/* ---------- SCREEN 5: STAFF TABLE & SLOT OVERVIEW ---------- */
+let d5=today;
+function r5(){
+  $('s5').innerHTML=`<h2>Table and slot overview</h2>
+  <div class="card"><div class="row"><div><label>Date</label><input type="date" value="${d5}" onchange="d5=this.value;r5()"></div><div></div></div>
+  <div class="legend"><span><i class="dot free"></i>Free</span><span><i class="dot res"></i>Reserved (guest name, party)</span></div></div>
+  <div class="card" style="overflow-x:auto"><table class="grid"><tr><th>Table</th>${SLOTS.map(s=>`<th class="c">${s}</th>`).join('')}</tr>
+  ${tables.map(t=>`<tr><td><b>${t.id}</b> <span class="hint">(seats ${t.cap})</span></td>${SLOTS.map(s=>{
+    const r=reservations.find(x=>x.date===d5&&x.slot===s&&x.table===t.id&&x.status==='Confirmed');
+    return r?`<td class="c res">${r.name}<br>${r.party} guests${itemCount(r.items)?' · pre-order':''}</td>`:`<td class="c free">Free</td>`}).join('')}</tr>`).join('')}</table></div>`;
+}
+
+/* ---------- SCREEN 6: STAFF RESERVATION LIST + MENU CRUD ---------- */
+let f6={date:'',status:''}, editMenu=null;
+function r6(){
+  const list=reservations.filter(r=>(!f6.date||r.date===f6.date)&&(!f6.status||r.status===f6.status)).sort((a,b)=>(a.date+a.slot).localeCompare(b.date+b.slot));
+  const em=editMenu?menu.find(m=>m.id===editMenu):null;
+  $('s6').innerHTML=`<h2>All reservations</h2>
+  <div class="card"><div class="row"><div><label>Date</label><input type="date" value="${f6.date}" onchange="f6.date=this.value;r6()"></div>
+  <div><label>Status</label><select onchange="f6.status=this.value;r6()">${['','Confirmed','Completed','Cancelled'].map(s=>`<option value="${s}" ${f6.status===s?'selected':''}>${s||'All statuses'}</option>`).join('')}</select></div>
+  <div style="align-self:end"><button class="btn alt" onclick="f6={date:'',status:''};r6()">Clear filters</button></div></div></div>
+  <div class="card" style="overflow-x:auto">${list.length?`<table><tr><th>Guest</th><th>Date</th><th>Time</th><th>Party</th><th>Table</th><th>Pre-order</th><th>Status</th><th></th></tr>
+  ${list.map(r=>`<tr><td>${r.name}<div class="hint">${r.phone}</div></td><td>${r.date}</td><td>${r.slot}</td><td>${r.party}</td><td>${r.table}</td>
+  <td>${itemCount(r.items)?`<span class="tag t-pre">${money(itemTotal(r.items))}</span>`:'<span class="tag t-none">None</span>'}</td>
+  <td><span class="badge b-${r.status}">${r.status}</span></td>
+  <td>${r.status==='Confirmed'?`<button class="btn sm alt" onclick="setSt(${r.id},'Completed')">Complete</button> <button class="btn sm bad" onclick="setSt(${r.id},'Cancelled')">Cancel</button>`:''}</td></tr>`).join('')}</table>`
+  :'<div class="empty"><h3>No reservations match</h3><p>Try a different date or status.</p></div>'}</div>
+
+  <h2 style="margin-top:28px">Menu management</h2>
+  <div class="card"><h3>${em?'Edit item':'Add item'}</h3><div class="row">
+    <div><label>Name</label><input id="mn" value="${em?em.name:''}"></div>
+    <div><label>Category</label><select id="mc">${['Starters','Mains','Desserts'].map(c=>`<option ${em&&em.cat===c?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div><label>Price (₹)</label><input id="mp" type="number" min="1" value="${em?em.price:''}"></div></div>
+    <div class="err" id="e6"></div><div style="margin-top:12px"><button class="btn" onclick="saveMenu()">${em?'Save changes':'Add item'}</button> ${em?'<button class="btn alt" onclick="editMenu=null;r6()">Cancel</button>':''}</div></div>
+  <div class="card" style="overflow-x:auto"><table><tr><th>Name</th><th>Category</th><th>Price</th><th></th></tr>
+  ${menu.map(m=>`<tr><td>${m.name}</td><td>${m.cat}</td><td>${money(m.price)}</td><td><button class="btn sm alt" onclick="editMenu=${m.id};r6()">Edit</button> <button class="btn sm bad" onclick="delMenu(${m.id})">Delete</button></td></tr>`).join('')}</table></div>`;
+}
+function setSt(id,s){reservations.find(r=>r.id===id).status=s;toast('Marked '+s);r6()}
+function saveMenu(){
+  const n=$('mn').value.trim(),c=$('mc').value,p=+$('mp').value;
+  if(!n||!(p>0)){$('e6').textContent='Enter an item name and a price above 0.';$('e6').className='err on';return}
+  if(editMenu){Object.assign(menu.find(m=>m.id===editMenu),{name:n,cat:c,price:p});editMenu=null;toast('Menu item updated')}
+  else{menu.push({id:nextMenuId++,name:n,cat:c,price:p});toast('Menu item added')}
+  r6();
+}
+function delMenu(id){if(confirm('Delete this menu item?')){menu=menu.filter(m=>m.id!==id);toast('Menu item deleted');r6()}}
+
+buildNav();go(1);
+</script>
+</body>
+</html>
